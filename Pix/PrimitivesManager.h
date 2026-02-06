@@ -15,7 +15,7 @@ public:
 	static PrimitivesManager* Get();
 
 	// Start accepting vertices
-	bool BeginDraw(Topology topology);
+	bool BeginDraw(Topology topology, bool applyTransform = false);
 	// Add vertices to the list, only if drawing is enabled
 	void AddVertex(const Vertex& vertex);
 	// Send all the stored vertices to the rasterizer as specified topology
@@ -27,4 +27,5 @@ private:
 	std::vector<Vertex> mVertexBuffer;
 	Topology mTopology = Topology::Point;
 	bool mDrawBegin = false;
+	bool mApplyTransform = false;
 };
