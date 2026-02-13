@@ -20,6 +20,36 @@ namespace
 			hw, hh, 0.0f, 1.0f
 		};
 	}
+
+	Vector3 CreateFaceNormal(const std::vector<Vertex>& traingles)
+	{
+		// to create a face normal
+		// we take the clockwise direction and do a cross product
+		// so 0-1(a-b), 0-2(a-c) for the directions
+		// crooss product
+		// return normal
+		Vector3 abDir = traingles[1].pos - traingles[0].pos;
+		Vector3 acDir = traingles[2].pos - traingles[0].pos;
+		Vector3 faceNormal = MathHelper::Normalize(MathHelper::Cross(abDir, acDir));
+		return faceNormal;
+	}
+	bool CullTraingle(CullMode mode, const std::vector<Vertex>& triangleInNDC)
+	{
+		if (mode == CullMode::None)
+		{
+			return false;
+		}
+		Vector3 faceNormal = CreateFaceNormal(triangleInNDC);
+		if (mode == CullMode::Back)
+		{
+			return faceNormal.z > 0.0f;
+		}
+		if (mode == CullMode::Front)
+		{
+			return faceNormal.z < 0.0f;
+		}
+		return false;
+	}
 }
 
 PrimitivesManager* PrimitivesManager::Get()
@@ -33,6 +63,16 @@ PrimitivesManager* PrimitivesManager::Get()
 PrimitivesManager::PrimitivesManager()
 {
 	
+}
+
+void PrimitivesManager::OnNewFrame()
+{
+	mCullMode = CullMode::Back;
+}
+
+void PrimitivesManager::SetCullMode(CullMode mode)
+{
+	mCullMode = mode;
 }
 
 bool PrimitivesManager::BeginDraw(Topology topology, bool applyTransformation)
@@ -68,7 +108,8 @@ bool PrimitivesManager::EndDraw()
 	Matrix4 matProj = Camera::Get()->GetProjectionMatrix();
 	// this matrix transforms the projection space to the screen space
 	Matrix4 matScreen = GetScreenTransform();
-	Matrix4 matFinal = matWorld * matView * matProj * matScreen;
+	// this will get the calculation to NDC space, which is the space after projection and before screen transform
+	Matrix4 matNDC = matWorld * matView * matProj;
 
 	Rasterizer* rasterizer = Rasterizer::Get();
 	switch (mTopology)
@@ -102,9 +143,23 @@ bool PrimitivesManager::EndDraw()
 			std::vector<Vertex> traingle = { mVertexBuffer[i - 2], mVertexBuffer[i - 1], mVertexBuffer[i] };
 			if (mApplyTransform)
 			{
+				// convert triangle position to NDC space
 				for (uint32_t v = 0; v < traingle.size(); ++v)
 				{
-					traingle[v].pos = MathHelper::TransformCoord(traingle[v].pos, matFinal);
+					traingle[v].pos = MathHelper::TransformCoord(traingle[v].pos, matNDC);
+				}
+
+				// while in ndc space, we can see if the face is facing
+				if (CullTraingle(mCullMode, traingle))
+				{
+					continue;
+				}
+
+				// convert ndc space to screen space
+				for (uint32_t v = 0; v < traingle.size(); ++v)
+				{
+					traingle[v].pos = MathHelper::TransformCoord(traingle[v].pos, matScreen);
+					// flatten only on screen space and only pixel x,y values
 					MathHelper::FlattenVectorScreenCoord(traingle[v].pos);
 				}
 			}
