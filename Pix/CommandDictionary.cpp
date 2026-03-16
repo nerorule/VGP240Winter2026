@@ -16,6 +16,9 @@
 
 #include "CmdVarInt.h"
 #include "CmdVarBool.h"
+#include "CmdLights.h"
+
+#include "CmdSetTexture.h"
 
 CommandDictionary* CommandDictionary::Get()
 {
@@ -46,6 +49,7 @@ CommandDictionary::CommandDictionary()
 	RegisterCommand<CmdVertex>();
 	RegisterCommand<CmmEndDraw>();
 	RegisterCommand<CmdSetCullMode>();
+	RegisterCommand<CmdSetTexture>();
 
 
 	// Matrix stack commands ( makes object world transform )
@@ -55,6 +59,12 @@ CommandDictionary::CommandDictionary()
 	RegisterCommand<CmdPushRotationZ>();
 	RegisterCommand<CmdPushScaling>();
 	RegisterCommand<CmdPopMatrix>();
+
+	// Light commands
+	RegisterCommand<CmdSetLightAmbient>();
+	RegisterCommand<CmdSetLightDiffuse>();
+	RegisterCommand<CmdSetLightSpecular>();
+	RegisterCommand<CmdAddDirectionalLight>();
 }
 
 TextEditor::LanguageDefinition CommandDictionary::GenerateLanguageDefinition()

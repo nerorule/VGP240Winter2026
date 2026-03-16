@@ -5,7 +5,6 @@
 class CmdVarInt : public Command
 {
 public:
-public:
 	const char* GetName() override
 	{
 		return "int";

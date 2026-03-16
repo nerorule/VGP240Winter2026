@@ -69,10 +69,17 @@ bool Execute(const std::vector<std::string>& params) override;
 class CmdSetCameraFOV : public Command
 {
 public:
-	const char* GetName() override 
+	const char* GetName() override
 	{
-		return "SetCameraFOV";
+		return "SetCameraFov";
 	}
+	const char* GetDescription() override
+	{
+		return "SetCameraFov\n"
+			"\n"
+			"- sets the camera fov\n";
+	}
+	bool Execute(const std::vector<std::string>& params) override;
 };
 
 

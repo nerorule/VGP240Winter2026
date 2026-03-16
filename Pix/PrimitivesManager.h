@@ -11,9 +11,9 @@ enum class Topology
 
 enum class CullMode
 {
-	None, // no culling used
-	Back, // cull items facing away from the camera
-	Front // cull items facing towards the camera
+	None,  // no culling used
+	Back,  // cull items facing away from camera
+	Front  // cull items facing the camera
 };
 
 class PrimitivesManager
@@ -23,6 +23,7 @@ public:
 
 	void OnNewFrame();
 	void SetCullMode(CullMode mode);
+	void SetCorrectUV(bool correctUV);
 
 	// Start accepting vertices
 	bool BeginDraw(Topology topology, bool applyTransform = false);
@@ -39,4 +40,5 @@ private:
 	CullMode mCullMode = CullMode::None;
 	bool mDrawBegin = false;
 	bool mApplyTransform = false;
+	bool mCorrectUV = false;
 };

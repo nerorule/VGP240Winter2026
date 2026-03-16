@@ -1,5 +1,7 @@
 #include "Rasterizer.h"
 #include "DepthBuffer.h"
+#include "LightManager.h"
+#include "TextureManager.h"
 
 void DrawLineHorizontal(const Vertex& left, const Vertex& right)
 {
@@ -43,6 +45,16 @@ void Rasterizer::SetFillMode(FillMode fillMode)
 	mFillMode = fillMode;
 }
 
+void Rasterizer::SetShadeMode(ShadeMode shadeMode)
+{
+	mShadeMode = shadeMode;
+}
+
+ShadeMode Rasterizer::GetShadeMode() const
+{
+	return ShadeMode();
+}
+
 void Rasterizer::DrawPoint(int x, int y)
 {
 	X::DrawPixel(x, y, mColor);
@@ -55,6 +67,11 @@ void Rasterizer::DrawPoint(const Vertex& vertex)
 	X::DrawPixel(x, y, vertex.color);
 	if (DepthBuffer::Get()->CheckDepthBuffer(x, y, vertex.pos.z))
 	{
+		mColor = TextureManager::Get()->SampleColor(vertex.color);
+		if (mShadeMode == ShadeMode::Phong)
+		{
+			mColor *= LightManager::Get()->ComputeLightColor(vertex.posWorld, vertex.norm);
+		}
 		X::DrawPixel(x, y, vertex.color);
 	}
 
